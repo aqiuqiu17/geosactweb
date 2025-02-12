@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/MultiPollution_2020_2.js"></script>
+        <script src="data/MultiPollution_2030_3.js"></script>
+        <script src="data/Risiko_2030_4.js"></script>
+        <script src="data/Risiko_2020_5.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        })
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
+        }
+        map.createPane('pane_GoogleMaps_0');
+        map.getPane('pane_GoogleMaps_0').style.zIndex = 400;
+        var layer_GoogleMaps_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleMaps_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+        });
+        layer_GoogleMaps_0;
+        map.addLayer(layer_GoogleMaps_0);
+        map.createPane('pane_F4Map2D_1');
+        map.getPane('pane_F4Map2D_1').style.zIndex = 401;
+        var layer_F4Map2D_1 = L.tileLayer('https://tile1.f4map.com/tiles/f4_2d/{z}/{x}/{y}.png', {
+            pane: 'pane_F4Map2D_1',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+        });
+        layer_F4Map2D_1;
+        map.addLayer(layer_F4Map2D_1);
+        function pop_MultiPollution_2020_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">WADMKK</th>\
+                        <td class="visible-with-data" id="WADMKK">' + (feature.properties['WADMKK'] !== null ? autolinker.link(feature.properties['WADMKK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Multipollution_2020</th>\
+                        <td class="visible-with-data" id="Multipollution_2020">' + (feature.properties['Multipollution_2020'] !== null ? autolinker.link(feature.properties['Multipollution_2020'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_MultiPollution_2020_2_0(feature) {
+            if (feature.properties['Multipollution_2020'] >= 0.190000 && feature.properties['Multipollution_2020'] <= 0.372000 ) {
+                return {
+                pane: 'pane_MultiPollution_2020_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,240,217,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Multipollution_2020'] >= 0.372000 && feature.properties['Multipollution_2020'] <= 0.518000 ) {
+                return {
+                pane: 'pane_MultiPollution_2020_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,204,138,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Multipollution_2020'] >= 0.518000 && feature.properties['Multipollution_2020'] <= 0.618000 ) {
+                return {
+                pane: 'pane_MultiPollution_2020_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,141,89,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Multipollution_2020'] >= 0.618000 && feature.properties['Multipollution_2020'] <= 0.720000 ) {
+                return {
+                pane: 'pane_MultiPollution_2020_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,74,51,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Multipollution_2020'] >= 0.720000 && feature.properties['Multipollution_2020'] <= 0.810000 ) {
+                return {
+                pane: 'pane_MultiPollution_2020_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(179,0,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_MultiPollution_2020_2');
+        map.getPane('pane_MultiPollution_2020_2').style.zIndex = 402;
+        map.getPane('pane_MultiPollution_2020_2').style['mix-blend-mode'] = 'normal';
+        var layer_MultiPollution_2020_2 = new L.geoJson(json_MultiPollution_2020_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_MultiPollution_2020_2',
+            layerName: 'layer_MultiPollution_2020_2',
+            pane: 'pane_MultiPollution_2020_2',
+            onEachFeature: pop_MultiPollution_2020_2,
+            style: style_MultiPollution_2020_2_0,
+        });
+        bounds_group.addLayer(layer_MultiPollution_2020_2);
+        map.addLayer(layer_MultiPollution_2020_2);
+        function pop_MultiPollution_2030_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">WADMKK</th>\
+                        <td class="visible-with-data" id="WADMKK">' + (feature.properties['WADMKK'] !== null ? autolinker.link(feature.properties['WADMKK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Multipollution_2030</th>\
+                        <td class="visible-with-data" id="Multipollution_2030">' + (feature.properties['Multipollution_2030'] !== null ? autolinker.link(feature.properties['Multipollution_2030'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_MultiPollution_2030_3_0(feature) {
+            if (feature.properties['Multipollution_2030'] >= 0.410000 && feature.properties['Multipollution_2030'] <= 0.502000 ) {
+                return {
+                pane: 'pane_MultiPollution_2030_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,240,217,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Multipollution_2030'] >= 0.502000 && feature.properties['Multipollution_2030'] <= 0.564000 ) {
+                return {
+                pane: 'pane_MultiPollution_2030_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,204,138,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Multipollution_2030'] >= 0.564000 && feature.properties['Multipollution_2030'] <= 0.642000 ) {
+                return {
+                pane: 'pane_MultiPollution_2030_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,141,89,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Multipollution_2030'] >= 0.642000 && feature.properties['Multipollution_2030'] <= 0.756000 ) {
+                return {
+                pane: 'pane_MultiPollution_2030_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,74,51,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Multipollution_2030'] >= 0.756000 && feature.properties['Multipollution_2030'] <= 0.880000 ) {
+                return {
+                pane: 'pane_MultiPollution_2030_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(179,0,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_MultiPollution_2030_3');
+        map.getPane('pane_MultiPollution_2030_3').style.zIndex = 403;
+        map.getPane('pane_MultiPollution_2030_3').style['mix-blend-mode'] = 'normal';
+        var layer_MultiPollution_2030_3 = new L.geoJson(json_MultiPollution_2030_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_MultiPollution_2030_3',
+            layerName: 'layer_MultiPollution_2030_3',
+            pane: 'pane_MultiPollution_2030_3',
+            onEachFeature: pop_MultiPollution_2030_3,
+            style: style_MultiPollution_2030_3_0,
+        });
+        bounds_group.addLayer(layer_MultiPollution_2030_3);
+        map.addLayer(layer_MultiPollution_2030_3);
+        function pop_Risiko_2030_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">WADMKK</th>\
+                        <td class="visible-with-data" id="WADMKK">' + (feature.properties['WADMKK'] !== null ? autolinker.link(feature.properties['WADMKK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Risiko_2030</th>\
+                        <td class="visible-with-data" id="Risiko_2030">' + (feature.properties['Risiko_2030'] !== null ? autolinker.link(feature.properties['Risiko_2030'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Risiko_2030_4_0(feature) {
+            if (feature.properties['Risiko_2030'] >= 0.070000 && feature.properties['Risiko_2030'] <= 0.114000 ) {
+                return {
+                pane: 'pane_Risiko_2030_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,255,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Risiko_2030'] >= 0.114000 && feature.properties['Risiko_2030'] <= 0.202000 ) {
+                return {
+                pane: 'pane_Risiko_2030_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,191,191,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Risiko_2030'] >= 0.202000 && feature.properties['Risiko_2030'] <= 0.296000 ) {
+                return {
+                pane: 'pane_Risiko_2030_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,128,128,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Risiko_2030'] >= 0.296000 && feature.properties['Risiko_2030'] <= 0.406000 ) {
+                return {
+                pane: 'pane_Risiko_2030_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,64,64,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Risiko_2030'] >= 0.406000 && feature.properties['Risiko_2030'] <= 1.000000 ) {
+                return {
+                pane: 'pane_Risiko_2030_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,0,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_Risiko_2030_4');
+        map.getPane('pane_Risiko_2030_4').style.zIndex = 404;
+        map.getPane('pane_Risiko_2030_4').style['mix-blend-mode'] = 'normal';
+        var layer_Risiko_2030_4 = new L.geoJson(json_Risiko_2030_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Risiko_2030_4',
+            layerName: 'layer_Risiko_2030_4',
+            pane: 'pane_Risiko_2030_4',
+            onEachFeature: pop_Risiko_2030_4,
+            style: style_Risiko_2030_4_0,
+        });
+        bounds_group.addLayer(layer_Risiko_2030_4);
+        map.addLayer(layer_Risiko_2030_4);
+        function pop_Risiko_2020_5(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">WADMKK</th>\
+                        <td class="visible-with-data" id="WADMKK">' + (feature.properties['WADMKK'] !== null ? autolinker.link(feature.properties['WADMKK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Risiko 2020</th>\
+                        <td class="visible-with-data" id="Risiko 2020">' + (feature.properties['Risiko 2020'] !== null ? autolinker.link(feature.properties['Risiko 2020'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Risiko_2020_5_0(feature) {
+            if (feature.properties['Risiko 2020'] >= 0.070000 && feature.properties['Risiko 2020'] <= 0.144000 ) {
+                return {
+                pane: 'pane_Risiko_2020_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,255,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Risiko 2020'] >= 0.144000 && feature.properties['Risiko 2020'] <= 0.230000 ) {
+                return {
+                pane: 'pane_Risiko_2020_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,191,191,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Risiko 2020'] >= 0.230000 && feature.properties['Risiko 2020'] <= 0.316000 ) {
+                return {
+                pane: 'pane_Risiko_2020_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,128,128,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Risiko 2020'] >= 0.316000 && feature.properties['Risiko 2020'] <= 0.420000 ) {
+                return {
+                pane: 'pane_Risiko_2020_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,64,64,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Risiko 2020'] >= 0.420000 && feature.properties['Risiko 2020'] <= 1.000000 ) {
+                return {
+                pane: 'pane_Risiko_2020_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,0,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_Risiko_2020_5');
+        map.getPane('pane_Risiko_2020_5').style.zIndex = 405;
+        map.getPane('pane_Risiko_2020_5').style['mix-blend-mode'] = 'normal';
+        var layer_Risiko_2020_5 = new L.geoJson(json_Risiko_2020_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Risiko_2020_5',
+            layerName: 'layer_Risiko_2020_5',
+            pane: 'pane_Risiko_2020_5',
+            onEachFeature: pop_Risiko_2020_5,
+            style: style_Risiko_2020_5_0,
+        });
+        bounds_group.addLayer(layer_Risiko_2020_5);
+        map.addLayer(layer_Risiko_2020_5);
+        var baseMaps = {};
+        var overlaysTree = [
+            {label: 'Risiko_2020<br /><table><tr><td style="text-align: center;"><img src="legend/Risiko_2020_5_00701440.png" /></td><td>0,07 - 0,144</td></tr><tr><td style="text-align: center;"><img src="legend/Risiko_2020_5_01440231.png" /></td><td>0,144 - 0,23</td></tr><tr><td style="text-align: center;"><img src="legend/Risiko_2020_5_02303162.png" /></td><td>0,23 - 0,316</td></tr><tr><td style="text-align: center;"><img src="legend/Risiko_2020_5_03160423.png" /></td><td>0,316 - 0,42</td></tr><tr><td style="text-align: center;"><img src="legend/Risiko_2020_5_04214.png" /></td><td>0,42 - 1</td></tr></table>', layer: layer_Risiko_2020_5},
+            {label: 'Risiko_2030<br /><table><tr><td style="text-align: center;"><img src="legend/Risiko_2030_4_00701140.png" /></td><td>0,07 - 0,114</td></tr><tr><td style="text-align: center;"><img src="legend/Risiko_2030_4_011402021.png" /></td><td>0,114 - 0,202</td></tr><tr><td style="text-align: center;"><img src="legend/Risiko_2030_4_020202962.png" /></td><td>0,202 - 0,296</td></tr><tr><td style="text-align: center;"><img src="legend/Risiko_2030_4_029604063.png" /></td><td>0,296 - 0,406</td></tr><tr><td style="text-align: center;"><img src="legend/Risiko_2030_4_040614.png" /></td><td>0,406 - 1</td></tr></table>', layer: layer_Risiko_2030_4},
+            {label: 'MultiPollution_2030<br /><table><tr><td style="text-align: center;"><img src="legend/MultiPollution_2030_3_04105020.png" /></td><td>0,41 - 0,502</td></tr><tr><td style="text-align: center;"><img src="legend/MultiPollution_2030_3_050205641.png" /></td><td>0,502 - 0,564</td></tr><tr><td style="text-align: center;"><img src="legend/MultiPollution_2030_3_056406422.png" /></td><td>0,564 - 0,642</td></tr><tr><td style="text-align: center;"><img src="legend/MultiPollution_2030_3_064207563.png" /></td><td>0,642 - 0,756</td></tr><tr><td style="text-align: center;"><img src="legend/MultiPollution_2030_3_07560884.png" /></td><td>0,756 - 0,88</td></tr></table>', layer: layer_MultiPollution_2030_3},
+            {label: 'MultiPollution_2020<br /><table><tr><td style="text-align: center;"><img src="legend/MultiPollution_2020_2_01903720.png" /></td><td>0,19 - 0,372</td></tr><tr><td style="text-align: center;"><img src="legend/MultiPollution_2020_2_037205181.png" /></td><td>0,372 - 0,518</td></tr><tr><td style="text-align: center;"><img src="legend/MultiPollution_2020_2_051806182.png" /></td><td>0,518 - 0,618</td></tr><tr><td style="text-align: center;"><img src="legend/MultiPollution_2020_2_06180723.png" /></td><td>0,618 - 0,72</td></tr><tr><td style="text-align: center;"><img src="legend/MultiPollution_2020_2_0720814.png" /></td><td>0,72 - 0,81</td></tr></table>', layer: layer_MultiPollution_2020_2},
+            {label: "F4 Map - 2D", layer: layer_F4Map2D_1},
+            {label: "Google Maps", layer: layer_GoogleMaps_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        map.addControl(new L.Control.Search({
+            layer: layer_Risiko_2020_5,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'WADMKK'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"Risiko 2020": "real","Risiko_2030": "real","Multipollution_2030": "real","Multipollution_2020": "real","WADMKK": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Risiko2020 = document.createElement("div");
+            div_Risiko2020.id = "div_Risiko2020";
+            div_Risiko2020.className = "slider";
+            document.getElementById("menu").appendChild(div_Risiko2020);
+            var lab_Risiko2020 = document.createElement('div');
+            lab_Risiko2020.innerHTML  = 'Risiko 2020: <span id="val_Risiko2020"></span>';
+            lab_Risiko2020.className = 'filterlabel';
+            document.getElementById("menu").appendChild(lab_Risiko2020);
+            var reset_Risiko2020 = document.createElement('div');
+            reset_Risiko2020.innerHTML = 'clear filter';
+            reset_Risiko2020.className = 'filterlabel';
+            lab_Risiko2020.className = 'filterlabel';
+            reset_Risiko2020.onclick = function() {
+                sel_Risiko2020.noUiSlider.reset();
+            };
+            document.getElementById("menu").appendChild(reset_Risiko2020);
+            var sel_Risiko2020 = document.getElementById('div_Risiko2020');
+            noUiSlider.create(sel_Risiko2020, {
+                connect: true,
+                start: [0.07, 1.0],
+                range: {
+                min: 0.07,
+                max: 1.0
+                }
+            });
+            sel_Risiko2020.noUiSlider.on('update', function (values) {
+            val_Risiko2020 = document.getElementById('val_Risiko2020');
+            val_Risiko2020.innerHTML = values.join(' - ');
+                filterFunc()
+            });
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Risiko_2030 = document.createElement("div");
+            div_Risiko_2030.id = "div_Risiko_2030";
+            div_Risiko_2030.className = "slider";
+            document.getElementById("menu").appendChild(div_Risiko_2030);
+            var lab_Risiko_2030 = document.createElement('div');
+            lab_Risiko_2030.innerHTML  = 'Risiko_2030: <span id="val_Risiko_2030"></span>';
+            lab_Risiko_2030.className = 'filterlabel';
+            document.getElementById("menu").appendChild(lab_Risiko_2030);
+            var reset_Risiko_2030 = document.createElement('div');
+            reset_Risiko_2030.innerHTML = 'clear filter';
+            reset_Risiko_2030.className = 'filterlabel';
+            lab_Risiko_2030.className = 'filterlabel';
+            reset_Risiko_2030.onclick = function() {
+                sel_Risiko_2030.noUiSlider.reset();
+            };
+            document.getElementById("menu").appendChild(reset_Risiko_2030);
+            var sel_Risiko_2030 = document.getElementById('div_Risiko_2030');
+            noUiSlider.create(sel_Risiko_2030, {
+                connect: true,
+                start: [0.07, 1.0],
+                range: {
+                min: 0.07,
+                max: 1.0
+                }
+            });
+            sel_Risiko_2030.noUiSlider.on('update', function (values) {
+            val_Risiko_2030 = document.getElementById('val_Risiko_2030');
+            val_Risiko_2030.innerHTML = values.join(' - ');
+                filterFunc()
+            });
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Multipollution_2030 = document.createElement("div");
+            div_Multipollution_2030.id = "div_Multipollution_2030";
+            div_Multipollution_2030.className = "slider";
+            document.getElementById("menu").appendChild(div_Multipollution_2030);
+            var lab_Multipollution_2030 = document.createElement('div');
+            lab_Multipollution_2030.innerHTML  = 'Multipollution_2030: <span id="val_Multipollution_2030"></span>';
+            lab_Multipollution_2030.className = 'filterlabel';
+            document.getElementById("menu").appendChild(lab_Multipollution_2030);
+            var reset_Multipollution_2030 = document.createElement('div');
+            reset_Multipollution_2030.innerHTML = 'clear filter';
+            reset_Multipollution_2030.className = 'filterlabel';
+            lab_Multipollution_2030.className = 'filterlabel';
+            reset_Multipollution_2030.onclick = function() {
+                sel_Multipollution_2030.noUiSlider.reset();
+            };
+            document.getElementById("menu").appendChild(reset_Multipollution_2030);
+            var sel_Multipollution_2030 = document.getElementById('div_Multipollution_2030');
+            noUiSlider.create(sel_Multipollution_2030, {
+                connect: true,
+                start: [0.41, 0.88],
+                range: {
+                min: 0.41,
+                max: 0.88
+                }
+            });
+            sel_Multipollution_2030.noUiSlider.on('update', function (values) {
+            val_Multipollution_2030 = document.getElementById('val_Multipollution_2030');
+            val_Multipollution_2030.innerHTML = values.join(' - ');
+                filterFunc()
+            });
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Multipollution_2020 = document.createElement("div");
+            div_Multipollution_2020.id = "div_Multipollution_2020";
+            div_Multipollution_2020.className = "slider";
+            document.getElementById("menu").appendChild(div_Multipollution_2020);
+            var lab_Multipollution_2020 = document.createElement('div');
+            lab_Multipollution_2020.innerHTML  = 'Multipollution_2020: <span id="val_Multipollution_2020"></span>';
+            lab_Multipollution_2020.className = 'filterlabel';
+            document.getElementById("menu").appendChild(lab_Multipollution_2020);
+            var reset_Multipollution_2020 = document.createElement('div');
+            reset_Multipollution_2020.innerHTML = 'clear filter';
+            reset_Multipollution_2020.className = 'filterlabel';
+            lab_Multipollution_2020.className = 'filterlabel';
+            reset_Multipollution_2020.onclick = function() {
+                sel_Multipollution_2020.noUiSlider.reset();
+            };
+            document.getElementById("menu").appendChild(reset_Multipollution_2020);
+            var sel_Multipollution_2020 = document.getElementById('div_Multipollution_2020');
+            noUiSlider.create(sel_Multipollution_2020, {
+                connect: true,
+                start: [0.19, 0.81],
+                range: {
+                min: 0.19,
+                max: 0.81
+                }
+            });
+            sel_Multipollution_2020.noUiSlider.on('update', function (values) {
+            val_Multipollution_2020 = document.getElementById('val_Multipollution_2020');
+            val_Multipollution_2020.innerHTML = values.join(' - ');
+                filterFunc()
+            });
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_WADMKK = document.createElement('div');
+            div_WADMKK.id = "div_WADMKK";
+            div_WADMKK.className= "filterselect";
+            document.getElementById("menu").appendChild(div_WADMKK);
+            sel_WADMKK = document.createElement('select');
+            sel_WADMKK.multiple = true;
+            sel_WADMKK.size = 10;
+            sel_WADMKK.id = "sel_WADMKK";
+            var WADMKK_options_str = "<option value='' unselected></option>";
+            sel_WADMKK.onchange = function(){filterFunc()};
+            WADMKK_options_str  += '<option value="Bandung">Bandung</option>';
+            WADMKK_options_str  += '<option value="Bandung Barat">Bandung Barat</option>';
+            WADMKK_options_str  += '<option value="Bekasi">Bekasi</option>';
+            WADMKK_options_str  += '<option value="Bogor">Bogor</option>';
+            WADMKK_options_str  += '<option value="Ciamis">Ciamis</option>';
+            WADMKK_options_str  += '<option value="Cianjur">Cianjur</option>';
+            WADMKK_options_str  += '<option value="Cirebon">Cirebon</option>';
+            WADMKK_options_str  += '<option value="Garut">Garut</option>';
+            WADMKK_options_str  += '<option value="Indramayu">Indramayu</option>';
+            WADMKK_options_str  += '<option value="Karawang">Karawang</option>';
+            WADMKK_options_str  += '<option value="Kota Bandung">Kota Bandung</option>';
+            WADMKK_options_str  += '<option value="Kota Banjar">Kota Banjar</option>';
+            WADMKK_options_str  += '<option value="Kota Bekasi">Kota Bekasi</option>';
+            WADMKK_options_str  += '<option value="Kota Bogor">Kota Bogor</option>';
+            WADMKK_options_str  += '<option value="Kota Cimahi">Kota Cimahi</option>';
+            WADMKK_options_str  += '<option value="Kota Cirebon">Kota Cirebon</option>';
+            WADMKK_options_str  += '<option value="Kota Depok">Kota Depok</option>';
+            WADMKK_options_str  += '<option value="Kota Sukabumi">Kota Sukabumi</option>';
+            WADMKK_options_str  += '<option value="Kota Tasikmalaya">Kota Tasikmalaya</option>';
+            WADMKK_options_str  += '<option value="Kuningan">Kuningan</option>';
+            WADMKK_options_str  += '<option value="Majalengka">Majalengka</option>';
+            WADMKK_options_str  += '<option value="Pangandaran">Pangandaran</option>';
+            WADMKK_options_str  += '<option value="Purwakarta">Purwakarta</option>';
+            WADMKK_options_str  += '<option value="Subang">Subang</option>';
+            WADMKK_options_str  += '<option value="Sukabumi">Sukabumi</option>';
+            WADMKK_options_str  += '<option value="Sumedang">Sumedang</option>';
+            WADMKK_options_str  += '<option value="Tasikmalaya">Tasikmalaya</option>';
+            sel_WADMKK.innerHTML = WADMKK_options_str;
+            div_WADMKK.appendChild(sel_WADMKK);
+            var lab_WADMKK = document.createElement('div');
+            lab_WADMKK.innerHTML = 'WADMKK';
+            lab_WADMKK.className = 'filterlabel';
+            div_WADMKK.appendChild(lab_WADMKK);
+            var reset_WADMKK = document.createElement('div');
+            reset_WADMKK.innerHTML = 'clear filter';
+            reset_WADMKK.className = 'filterlabel';
+            reset_WADMKK.onclick = function() {
+                var options = document.getElementById("sel_WADMKK").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_WADMKK.appendChild(reset_WADMKK);
+        </script>
+    </body>
+</html>
